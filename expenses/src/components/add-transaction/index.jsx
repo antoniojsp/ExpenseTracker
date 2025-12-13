@@ -1,55 +1,84 @@
 import {
-  Button,
-  RadioGroup,
-  Dialog,
-  Portal
-} from "@chakra-ui/react";
+    Button,
+    FormControl,
+    FormLabel,
+    Input,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalFooter,
+    ModalOverlay,
+    Radio,
+    RadioGroup,
+    ModalContent,
+    ModalHeader
+} from "@chakra-ui/react"
+import { useContext } from "react"
+import { GlobalContext } from "../../context";
+ 
 
-export default function Transaction({ isOpen, onClose }) {
-  return (
-    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <Dialog.Trigger asChild>
-        <Button variant="outline" size="sm">
-          Open Dialog
-        </Button>
-      </Dialog.Trigger>
-      <Portal>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          console.log("Submitted!");
-          onClose();
-        }}
-      >
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header>
-              <Dialog.Title>Add New Transaction</Dialog.Title>
-              <Dialog.CloseButton />
-            </Dialog.Header>
+export default function Transaction({isOpen, onClose}) {
 
-            <Dialog.Body>
-              <RadioGroup name="type" defaultValue="income">
-                <RadioGroup.Item value="income" colorScheme="blue" mr={4}>
-                  Income
-                </RadioGroup.Item>
-                <RadioGroup.Item value="expense" colorScheme="red">
-                  Expense
-                </RadioGroup.Item>
-              </RadioGroup>
-            </Dialog.Body>
+const {formData, setFormData, value, setValue, handleFormSubmit} = useContext(GlobalContext);
 
-            <Dialog.Footer>
-              <Button mr={4} onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit">Add</Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </form>
-      </Portal>
-    </Dialog.Root>
-  );
+    function handleFormChange(event){
+        setFormData({
+            ...formData, [event.target.name]: event.target.value, 
+        })
+    }
+    function handleSubmit(e){
+        e.preventDefault()
+        handleFormSubmit(formData)
+    }
+    return <Modal isOpen={isOpen} onClose={onClose}>
+        <form onSubmit={handleSubmit}>
+            <ModalOverlay />
+            <ModalContent>
+                <ModalHeader>Add New Transaction</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                    <FormControl>
+                        <FormLabel>Enter Description</FormLabel>
+                        <Input
+                            placeholder="Enter Transaction Description"
+                            name="description"
+                            type="text"
+                            onChange={handleFormChange}
+                        />
+                    </FormControl>
+                    <FormControl>
+                        <FormLabel>Enter Amount</FormLabel>
+                        <Input
+                            placeholder="Enter Transaction Amount"
+                            name="amount"
+                            type="number"
+                            onChange={handleFormChange}
+                        />
+                    </FormControl>
+                    <RadioGroup mt={'5'} value={value} onChange={setValue}>
+                        <Radio 
+                        checked={formData.type === 'income'}
+                        value={'income'} 
+                        name="type" 
+                        colorScheme="blue"
+                        onChange={handleFormChange}
+                        >Income
+                        </Radio>
+                        <Radio 
+                        checked={formData.type === 'expense'}
+                        value={'expense'} 
+                        name="type" 
+                        colorScheme="red"
+                        onChange={handleFormChange}
+                        >Expense
+                        </Radio>
+                    </RadioGroup>
+                    <ModalFooter>
+                        <Button mr={'4'} onClick={onClose}>Cancel</Button>
+                        <Button onClick={onClose} type="submit">Add</Button>
+                    </ModalFooter>
+                </ModalBody>
+            </ModalContent>
+        </form>
+    </Modal>
 }
